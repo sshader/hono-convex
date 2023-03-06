@@ -1,4 +1,4 @@
-// This file is taken from https://github.com/get-convex/convex-helpers/blob/main/convex/lib/honoWithConvex.ts
+// Taken from https://github.com/get-convex/convex-helpers/blob/main/convex/lib/honoWithConvex.ts
 import {
   HttpRouter,
   PublicHttpEndpoint,
@@ -47,7 +47,7 @@ export type HonoWithConvex = Hono<{ Bindings: HttpEndpointCtx }>;
  * ```
  * const app: HonoWithConvex = new Hono();
  *
- * // add hono routes
+ * // add Hono routes on `app`
  *
  * export default new HttpRouterWithHono(app);
  * ```
@@ -126,7 +126,7 @@ export class HttpRouterWithHono extends HttpRouter {
   lookup = (path: string, method: RoutableMethod | "HEAD") => {
     const match = this._app.router.match(method, path);
     if (match === null) {
-      return null;
+      return [this._handler, normalizeMethod(method), path] as const;
     }
     // There might be multiple handlers for a route (in the case of middleware),
     // so choose the most specific one for the purposes of logging
@@ -135,7 +135,7 @@ export class HttpRouterWithHono extends HttpRouter {
     if (this._handlerInfoCache.size === 0) {
       for (const r of this._app.routes) {
         this._handlerInfoCache.set(r.handler, {
-          method: r.method as RoutableMethod,
+          method: normalizeMethod(method),
           path: r.path,
         });
       }
@@ -145,6 +145,14 @@ export class HttpRouterWithHono extends HttpRouter {
       return [this._handler, info.method, info.path] as const;
     }
 
-    return [this._handler, method as RoutableMethod, path] as const;
+    return [this._handler, normalizeMethod(method), path] as const;
   };
+}
+
+export function normalizeMethod(
+  method: RoutableMethod | "HEAD"
+): RoutableMethod {
+  // HEAD is handled by Convex by running GET and stripping the body.
+  if (method === "HEAD") return "GET";
+  return method;
 }
