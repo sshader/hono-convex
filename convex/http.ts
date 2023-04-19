@@ -26,7 +26,7 @@ app.get("/listMessages/:userId{[0-9]+}", async (c) => {
   const userId = c.req.param("userId");
 
   // Running a Convex query
-  const messages = await c.env.runQuery("listMessages:byAuthor", userId);
+  const messages = await c.env.runQuery("listMessages:byAuthor", { authorNumber: userId });
 
   // Helpers for pretty JSON!
   c.pretty(true, 2);
@@ -46,7 +46,7 @@ app.post(
   async (c) => {
     // With type safety!
     const { body, author } = c.req.valid("json");
-    await c.env.runMutation("sendMessage", body, author);
+    await c.env.runMutation("sendMessage", { body, author });
     return c.text("Sent message!");
   }
 );
