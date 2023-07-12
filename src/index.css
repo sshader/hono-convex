@@ -50,16 +50,17 @@ h3 {
   font-size: 0.75em;
 }
 
-.instructions {
+.request {
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.card {
   margin: 8px;
   padding: 8px 16px 8px 16px;
   border-radius: 8px;
   border: solid 1px lightgray;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.instructions p {
-  color: #6c757d;
 }
 
 ul {
@@ -103,6 +104,12 @@ li span:nth-child(3) {
 form {
   display: flex;
   justify-content: center;
+}
+
+form div {
+  gap: 5px;
+  display: inline-flex;
+  align-items: center;
 }
 
 input:not([type]) {

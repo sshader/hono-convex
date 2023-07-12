@@ -5,6 +5,7 @@ import { HonoWithConvex, HttpRouterWithHono } from "./lib/honoWithConvex";
 import { cors } from "hono/cors";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
+import { internal } from "./_generated/api";
 
 const app: HonoWithConvex = new Hono();
 
@@ -21,19 +22,45 @@ app.use(
   })
 );
 
-app.get("/listMessages/:userId{[0-9]+}", async (c) => {
+app.get("/hello", (c) => {
+  return c.text("hello!");
+});
+
+// Set up CORS as middleware
+app.use("/api/*", cors());
+
+// Nested routing -- This is `/api/hello`.
+// This endpoint should be accessible from the browser.
+const apiRouter = app.basePath("/api");
+
+apiRouter.get("/hello", (c) => {
+  return c.text("hello!");
+});
+
+apiRouter.get("/listMessages/:userId{[0-9]+}", async (c) => {
   // Extracting a token from the URL!
   const userId = c.req.param("userId");
 
   // Running a Convex query
-  const messages = await c.env.runQuery("listMessages:byAuthor", { authorNumber: userId });
+  const messages = await c.env.runQuery(internal.messages.listByAuthor, {
+    authorNumber: userId,
+  });
 
   // Helpers for pretty JSON!
   c.pretty(true, 2);
   return c.json(messages);
 });
 
-app.post(
+apiRouter.get("/listMessages", async (c) => {
+  // Running a Convex query
+  const messages = await c.env.runQuery(internal.messages.listAll);
+
+  // Helpers for pretty JSON!
+  c.pretty(true, 2);
+  return c.json(messages);
+});
+
+apiRouter.post(
   "/postMessage",
   // Body validation!
   zValidator(
@@ -46,18 +73,10 @@ app.post(
   async (c) => {
     // With type safety!
     const { body, author } = c.req.valid("json");
-    await c.env.runMutation("sendMessage", { body, author });
+    await c.env.runMutation(internal.messages.send, { body, author });
     return c.text("Sent message!");
   }
 );
-
-// Set up CORS as middleware
-app.use("/api/*", cors());
-
-// This endpoint should be accessible from the browser.
-app.get("/api/hello", (c) => {
-  return c.text("hello!");
-});
 
 app.use(
   "/api2/*",
