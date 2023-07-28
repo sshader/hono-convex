@@ -1,10 +1,6 @@
 import { FormEvent, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { Doc } from "../convex/_generated/dataModel";
 
 export default function App() {
-  const [messages, setMessages] = useState<Doc<"messages">[]>([]);
-
   const [newMessageText, setNewMessageText] = useState("");
 
   const convexDeploymentUrl = import.meta.env.VITE_CONVEX_URL;

@@ -15,6 +15,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as http from "../http";
+import type * as init from "../init";
 import type * as lib_honoWithConvex from "../lib/honoWithConvex";
 import type * as messages from "../messages";
 
@@ -28,6 +29,7 @@ import type * as messages from "../messages";
  */
 declare const fullApi: ApiFromModules<{
   http: typeof http;
+  init: typeof init;
   "lib/honoWithConvex": typeof lib_honoWithConvex;
   messages: typeof messages;
 }>;
