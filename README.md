@@ -1,5 +1,7 @@
 # Convex + Hono HTTP Endpoints
 
+![image](./hono-convex.png)
+
 This example demonstrates how to use Convex
 [HTTP actions](https://docs.convex.dev/using/http-endpoints) with [Hono](https://hono.dev/) to build a public HTTP API.
 
