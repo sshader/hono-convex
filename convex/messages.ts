@@ -3,18 +3,15 @@ import { Doc } from "./_generated/dataModel";
 import { internalMutation, internalQuery } from "./_generated/server";
 
 export const listAll = internalQuery(
-  async ({ db }): Promise<Doc<"messages">[]> => {
-    return await db.query("messages").collect();
+  async (ctx): Promise<Doc<"messages">[]> => {
+    return await ctx.db.query("messages").collect();
   }
 );
 
 export const listByAuthor = internalQuery({
   args: { authorNumber: v.string() },
-  handler: async (
-    { db },
-    { authorNumber }: { authorNumber: string }
-  ): Promise<Doc<"messages">[]> => {
-    const messages = await db.query("messages").collect();
+  handler: async (ctx, { authorNumber }): Promise<Doc<"messages">[]> => {
+    const messages = await ctx.db.query("messages").collect();
     return messages.filter((message) => message.author.includes(authorNumber));
   },
 });
@@ -24,11 +21,8 @@ export const send = internalMutation({
     body: v.string(),
     author: v.string(),
   },
-  handler: async (
-    { db },
-    { body, author }: { body: string; author: string }
-  ) => {
+  handler: async (ctx, { body, author }) => {
     const message = { body, author };
-    await db.insert("messages", message);
+    await ctx.db.insert("messages", message);
   },
 });
