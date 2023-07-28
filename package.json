@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "npm-run-all dev:init --parallel dev:frontend dev:backend",
     "build": "vite build",
-    "dev:init": "convex dev --until-success",
+    "dev:init": "convex dev --until-success --run init",
     "dev:frontend": "vite --open --clearScreen false",
     "dev:backend": "convex dev"
   },
