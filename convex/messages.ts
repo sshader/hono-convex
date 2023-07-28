@@ -10,10 +10,7 @@ export const listAll = internalQuery({
 
 export const listByAuthor = internalQuery({
   args: { authorNumber: v.string() },
-  handler: async (
-    ctx,
-    { authorNumber }: { authorNumber: string }
-  ): Promise<Doc<"messages">[]> => {
+  handler: async (ctx, { authorNumber }): Promise<Doc<"messages">[]> => {
     const messages = await ctx.db.query("messages").collect();
     return messages.filter((message) => message.author.includes(authorNumber));
   },
@@ -24,7 +21,7 @@ export const send = internalMutation({
     body: v.string(),
     author: v.string(),
   },
-  handler: async (ctx, { body, author }: { body: string; author: string }) => {
+  handler: async (ctx, { body, author }) => {
     const message = { body, author };
     await ctx.db.insert("messages", message);
   },

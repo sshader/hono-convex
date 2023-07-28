@@ -2,12 +2,11 @@
   "name": "http",
   "version": "0.0.0",
   "scripts": {
-    "dev": "npm-run-all init dev:init --parallel dev:frontend dev:backend",
+    "dev": "npm-run-all dev:init --parallel dev:frontend dev:backend",
     "build": "vite build",
-    "init": "convex init",
-    "dev:backend": "convex dev",
+    "dev:init": "convex dev --until-success",
     "dev:frontend": "vite --open --clearScreen false",
-    "dev:init": "convex dev --once"
+    "dev:backend": "convex dev"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.1.3",
