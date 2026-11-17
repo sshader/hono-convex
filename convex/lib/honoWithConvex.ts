@@ -78,7 +78,9 @@ export class HttpRouterWithHono extends HttpRouter {
    * @returns - an array of [path, method, endpoint] tuples.
    */
   getRoutes = () => {
-    const convexRoutes: [string, RoutableMethod, (...args: any) => any][] = [];
+    // Every route is served by the one httpAction that forwards to Hono, and
+    // Convex now requires each route's handler to be an httpAction.
+    const convexRoutes: [string, RoutableMethod, PublicHttpAction][] = [];
 
     // Likely a better way to do this, but hono will have multiple handlers with the same
     // name (i.e. for middleware), so de-duplicate so we don't show multiple routes in the dashboard.
@@ -91,7 +93,7 @@ export class HttpRouterWithHono extends HttpRouter {
           const name = `${method} ${route.path}`;
           if (!seen.has(name)) {
             seen.add(name);
-            convexRoutes.push([route.path, method, route.handler]);
+            convexRoutes.push([route.path, method, this._handler]);
           }
         }
       } else {
@@ -101,7 +103,7 @@ export class HttpRouterWithHono extends HttpRouter {
           convexRoutes.push([
             route.path,
             route.method as RoutableMethod,
-            route.handler,
+            this._handler,
           ]);
         }
       }
@@ -126,13 +128,20 @@ export class HttpRouterWithHono extends HttpRouter {
    * @returns - a tuple [PublicHttpEndpoint, method, path] or null.
    */
   lookup = (path: string, method: RoutableMethod | "HEAD") => {
-    const match = this._app.router.match(method, path);
-    if (match === null) {
+    // Since Hono 3.8 the router returns [[[handler, route], params][], ...]
+    // rather than { handlers }, and an empty list rather than null. It has no
+    // matcher for HEAD (Hono serves HEAD as GET), so match on GET for those.
+    const handlersAndRoutes = this._app.router.match(
+      normalizeMethod(method),
+      path
+    )[0];
+    if (handlersAndRoutes.length === 0) {
       return [this._handler, normalizeMethod(method), path] as const;
     }
     // There might be multiple handlers for a route (in the case of middleware),
     // so choose the most specific one for the purposes of logging
-    const mostSpecificHandler = match.handlers[match.handlers.length - 1];
+    const mostSpecificHandler =
+      handlersAndRoutes[handlersAndRoutes.length - 1][0][0];
     // On the first request let's populate a lookup from handler to info
     if (this._handlerInfoCache.size === 0) {
       for (const r of this._app.routes) {
