@@ -3,6 +3,7 @@ import { logger } from "hono/logger";
 import stripAnsi from "strip-ansi";
 import { HonoWithConvex, HttpRouterWithHono } from "./lib/honoWithConvex";
 import { cors } from "hono/cors";
+import { prettyJSON } from "hono/pretty-json";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { internal } from "./_generated/api";
@@ -25,6 +26,10 @@ app.use(
 // Set up CORS as middleware
 app.use("/api/*", cors());
 
+// Pretty JSON for any response, when the URL has `?pretty` (this replaces
+// `c.pretty()`, which Hono removed in 3.4)
+app.use("/api/*", prettyJSON());
+
 // This endpoint should be accessible from the browser.
 const apiRouter = app.basePath("/api");
 
@@ -33,8 +38,6 @@ apiRouter.get("/listMessages", async (c) => {
   // Running a Convex query
   const messages = await c.env.runQuery(internal.messages.listAll);
 
-  // Helpers for pretty JSON!
-  c.pretty(true, 2);
   return c.json(messages);
 });
 
@@ -47,8 +50,6 @@ apiRouter.get("/listMessages/:userId{[0-9]+}", async (c) => {
     authorNumber: userId,
   });
 
-  // Helpers for pretty JSON!
-  c.pretty(true, 2);
   return c.json(messages);
 });
 
